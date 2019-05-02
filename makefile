@@ -20,9 +20,6 @@ temp_times.txt: temp_crime_per_line.txt
 
 temp_time_stamps.csv: temp_times.txt temp_dates.txt
 	paste -d ' ' temp_dates.txt temp_times.txt >$@
-
-temp_homicide_final.csv: temp_ids.txt temp_lat_long.csv temp_time_stamps.csv
-	paste -d ',' temp_ids.txt temp_time_stamps.csv temp_lat_long.csv | egrep -v '^([0-9]*).*,\1$$' | cut -f 2,3,4 -d "," > $@
 	
 temp_new_add.csv: temp_ids.txt temp_addresses.txt
 	paste -d "," temp_ids.txt temp_addresses.txt | sed 's/.*/&,Chicago,IL,/' > $@
@@ -32,6 +29,9 @@ temp_geo_code_results.csv: temp_new_add.csv
 
 temp_lat_long.csv: temp_geo_code_results.csv
 	cat temp_geo_code_results.csv | cut -d "," -f 1,12,13 | sed 's/"//g' | sort -n | sed 's/[^,]*,//' > $@
+
+temp_homicide_final.csv: temp_ids.txt temp_lat_long.csv temp_time_stamps.csv
+	paste -d ',' temp_ids.txt temp_time_stamps.csv temp_lat_long.csv | egrep -v '^([0-9]*).*,\1$$' | cut -f 2,3,4 -d "," > $@
 
 final_dat.csv: temp_homicide_final.csv CPDCrimes.csv
 	cat CPDCrimes.csv | sed 's/T/ /' | sed 's/-/\//' | sed 's/-/\//' | sed 's/:00\.000//' > $@
